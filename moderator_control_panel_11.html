@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Town of Salem — Moderator Control Panel</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Inter:wght@400;500&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg0:#0d0a0b;--bg1:#13100f;--bg2:#1c1614;--bg3:#261e1c;
+  --cr:#8b1a1a;--cr-bright:#c0392b;--cr-glow:#e74c3c;
+  --cr-dim:rgba(139,26,26,0.18);--cr-mid:rgba(139,26,26,0.35);--cr-border:rgba(192,57,43,0.4);
+  --gold:#c9a96e;--gold-dim:rgba(201,169,110,0.15);--gold-border:rgba(201,169,110,0.3);
+  --text0:#f0e6d3;--text1:#c4b49a;--text2:#7a6a5a;--text3:#4a3c30;
+  --b0:rgba(240,230,211,0.06);--b1:rgba(240,230,211,0.12);--b2:rgba(240,230,211,0.22);
+  --tw-bg:rgba(46,110,78,0.15);--tw-br:rgba(46,110,78,0.4);--tw-tx:#6fcf97;
+  --ma-bg:rgba(139,26,26,0.18);--ma-br:rgba(192,57,43,0.45);--ma-tx:#e57373;
+  --ne-bg:rgba(107,90,46,0.15);--ne-br:rgba(201,169,110,0.35);--ne-tx:#c9a96e;
+  --r:6px;--rl:10px;--font:'Inter',system-ui,sans-serif;--disp:'Cinzel',serif;
+}
+body{font-family:var(--font);background:var(--bg0);color:var(--text0);min-height:100vh;padding:20px;
+  background-image:repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(255,255,255,.018) 39px,rgba(255,255,255,.018) 40px),
+    repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(255,255,255,.018) 39px,rgba(255,255,255,.018) 40px);}
+.screen{display:none;max-width:920px;margin:0 auto;}.screen.active{display:block;}
+input,select,button{font-family:var(--font);}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:7px 14px;font-size:12px;font-weight:500;border:1px solid var(--b1);border-radius:var(--r);background:transparent;color:var(--text1);cursor:pointer;transition:all .15s;}
+.btn:hover{background:var(--b0);border-color:var(--b2);color:var(--text0);}.btn:active{transform:scale(.97);}
+.btn-primary{background:var(--cr);border-color:var(--cr-bright);color:#f0e6d3;font-family:var(--disp);letter-spacing:.06em;font-size:11px;}
+.btn-primary:hover{background:var(--cr-bright);border-color:var(--cr-glow);}
+.btn-danger{border-color:var(--cr-border);color:var(--ma-tx);}
+.btn-danger:hover{background:var(--cr-dim);}
+.btn-sm{padding:4px 10px;font-size:11px;}
+.btn-success{border-color:var(--tw-br);color:var(--tw-tx);}
+.btn-success:hover{background:var(--tw-bg);}
+.btn-gold{border-color:var(--gold-border);color:var(--gold);}
+.btn-gold:hover{background:var(--gold-dim);}
+.btn:disabled{opacity:.3;cursor:default;pointer-events:none;}
+
+.card{background:var(--bg1);border:1px solid var(--b1);border-radius:var(--rl);padding:16px;}
+.label{font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--text2);margin-bottom:8px;}
+h1{font-family:var(--disp);font-size:22px;font-weight:600;letter-spacing:.06em;color:var(--text0);margin-bottom:3px;}
+.page-header{display:flex;align-items:center;gap:12px;margin-bottom:24px;}
+.header-crest{width:36px;height:36px;border-radius:50%;background:var(--cr-dim);border:1px solid var(--cr-border);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+/* ── Wiki ── */
+.wiki-card{border:1px solid var(--b1);border-radius:var(--rl);overflow:hidden;margin-bottom:8px;transition:border-color .15s;}
+.wiki-card:hover{border-color:var(--b2);}
+.wiki-card-hd{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;user-select:none;}
+.wiki-emoji{font-size:20px;flex-shrink:0;}
+.wiki-role-name{font-family:var(--disp);font-size:13px;font-weight:500;letter-spacing:.04em;flex:1;}
+.wiki-tags{display:flex;gap:5px;align-items:center;flex-wrap:wrap;}
+.wiki-pts-badge{font-family:var(--disp);font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;white-space:nowrap;}
+.wiki-pts-town{background:var(--tw-bg);border:1px solid var(--tw-br);color:var(--tw-tx);}
+.wiki-pts-mafia{background:var(--ma-bg);border:1px solid var(--ma-br);color:var(--ma-tx);}
+.wiki-pts-neutral{background:var(--ne-bg);border:1px solid var(--ne-br);color:var(--ne-tx);}
+.wiki-arrow{font-size:11px;color:var(--text2);opacity:.5;transition:transform .2s,opacity .15s;flex-shrink:0;}
+.wiki-arrow.open{transform:rotate(90deg);opacity:1;}
+.wiki-body-inner{display:none;padding:2px 14px 14px;border-top:1px solid var(--b0);}
+.wiki-body-inner.open{display:block;}
+.wiki-section-lbl{font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--text2);margin:12px 0 5px;}
+.wiki-section-lbl:first-child{margin-top:14px;}
+.wiki-desc{font-size:13px;color:var(--text1);line-height:1.65;}
+.wiki-tip{font-size:12px;color:var(--text2);line-height:1.6;font-style:italic;border-left:2px solid var(--b2);padding-left:10px;margin-top:6px;}
+.wiki-faction-hd{font-family:var(--disp);font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;padding:10px 0 8px;border-bottom:1px solid var(--b1);margin-bottom:10px;}
+.wiki-faction-hd.town{color:var(--tw-tx);}.wiki-faction-hd.mafia{color:var(--ma-tx);}.wiki-faction-hd.neutral{color:var(--ne-tx);}
+.wiki-f-btn.active-wiki{background:var(--b0);border-color:var(--b2) !important;color:var(--text0) !important;}
+
+.crimson-divider{height:1px;background:linear-gradient(90deg,transparent,var(--cr-mid),transparent);margin:20px 0;}
+
+.setup-tabs,.game-tabs{display:flex;gap:2px;border-bottom:1px solid var(--b1);margin-bottom:20px;}
+.setup-tab,.game-tab{padding:9px 16px;font-size:12px;font-family:var(--disp);letter-spacing:.04em;cursor:pointer;border:none;background:none;color:var(--text2);border-bottom:2px solid transparent;transition:all .15s;}
+.setup-tab:hover,.game-tab:hover{color:var(--text1);}
+.setup-tab.active,.game-tab.active{color:var(--gold);border-bottom:2px solid var(--gold);font-weight:500;}
+.setup-panel,.game-panel{display:none;}.setup-panel.active,.game-panel.active{display:block;}
+
+.tag{display:inline-block;font-size:10px;font-weight:500;letter-spacing:.04em;padding:2px 8px;border-radius:20px;white-space:nowrap;}
+.tag-town{background:var(--tw-bg);border:1px solid var(--tw-br);color:var(--tw-tx);}
+.tag-mafia{background:var(--ma-bg);border:1px solid var(--ma-br);color:var(--ma-tx);}
+.tag-neutral{background:var(--ne-bg);border:1px solid var(--ne-br);color:var(--ne-tx);}
+
+.phase-pill{display:inline-flex;align-items:center;gap:8px;padding:5px 14px;border-radius:20px;font-size:12px;font-family:var(--disp);letter-spacing:.05em;}
+.phase-night{background:rgba(10,14,40,.6);border:1px solid rgba(100,120,200,.35);color:#a0b4f0;}
+.phase-day{background:rgba(40,28,10,.6);border:1px solid var(--gold-border);color:var(--gold);}
+
+.stat-mini{background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r);padding:8px 14px;text-align:center;}
+.stat-val{font-family:var(--disp);font-size:20px;font-weight:600;color:var(--text0);}
+.stat-lbl{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text2);margin-top:2px;}
+
+.player-row{display:grid;grid-template-columns:26px 1fr 126px 88px 30px 30px;align-items:center;gap:7px;padding:7px 8px;border-radius:var(--r);transition:background .12s;border-bottom:1px solid var(--b0);}
+.player-row:last-child{border-bottom:none;}.player-row:hover{background:var(--bg2);}.player-row.dead{opacity:.35;}
+.player-num{font-size:11px;color:var(--text3);text-align:center;font-family:var(--disp);}
+.player-name{font-size:13px;font-weight:500;color:var(--text0);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.player-name.dead{text-decoration:line-through;color:var(--text2);}
+
+.timer-display{font-family:var(--disp);font-size:52px;font-weight:600;letter-spacing:-.01em;text-align:center;line-height:1;color:var(--text0);}
+.timer-warn{color:var(--cr-glow)!important;}
+
+select,input[type=text]{width:100%;padding:6px 8px;font-size:12px;border:1px solid var(--b1);border-radius:var(--r);background:var(--bg2);color:var(--text0);cursor:pointer;outline:none;transition:border-color .15s;}
+select:hover,input[type=text]:hover{border-color:var(--b2);}
+select:focus,input[type=text]:focus{border-color:var(--cr-border);}
+option{background:var(--bg2);}
+
+.na-card{border:1px solid var(--b1);border-radius:var(--r);overflow:hidden;margin-bottom:8px;transition:border-color .15s;}
+.na-card:hover{border-color:var(--b2);}
+.na-card-hd{display:flex;align-items:center;gap:8px;padding:8px 11px;}
+.na-emoji{font-size:15px;line-height:1;flex-shrink:0;}
+.na-role{font-size:12px;font-weight:500;font-family:var(--disp);letter-spacing:.03em;}
+.na-members{font-size:11px;color:var(--text2);padding:4px 11px 0;line-height:1.5;}
+.na-body{padding:7px 11px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.na-note{font-size:11px;color:var(--text2);padding:0 11px 8px;font-style:italic;}
+.na-section-hd{font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;padding:10px 0 6px;border-bottom:1px solid var(--b1);margin-bottom:8px;font-family:var(--disp);}
+.na-section-hd.mhd{color:var(--ma-tx);}.na-section-hd.thd{color:var(--tw-tx);}.na-section-hd.nhd{color:var(--ne-tx);}
+.commit-bar{display:flex;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--b1);}
+
+.resolve-card{border:1px solid var(--gold-border);border-radius:var(--rl);overflow:hidden;margin-bottom:12px;animation:fadeIn .3s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.resolve-hd{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--gold-dim);border-bottom:1px solid var(--gold-border);}
+.resolve-hd-title{font-family:var(--disp);font-size:12px;letter-spacing:.05em;color:var(--gold);}
+.resolve-event{display:flex;align-items:flex-start;gap:10px;padding:9px 14px;border-bottom:1px solid var(--b0);font-size:13px;}
+.resolve-event:last-child{border-bottom:none;}
+.re-icon{font-size:16px;flex-shrink:0;margin-top:1px;}
+.re-main{color:var(--text0);line-height:1.4;}
+.re-sub{font-size:11px;color:var(--text2);margin-top:3px;}
+.re-pts{font-family:var(--disp);font-size:11px;color:var(--gold);margin-left:auto;white-space:nowrap;padding-left:8px;align-self:center;}
+
+.win-banner{border-radius:var(--rl);padding:24px;text-align:center;margin-bottom:16px;animation:fadeIn .4s ease;}
+.win-banner.tw{background:rgba(46,110,78,.2);border:1px solid var(--tw-br);}
+.win-banner.ma{background:rgba(139,26,26,.2);border:1px solid var(--ma-br);}
+.win-banner.ne{background:rgba(107,90,46,.2);border:1px solid var(--ne-br);}
+.win-banner h2{font-family:var(--disp);font-size:20px;letter-spacing:.06em;margin-bottom:6px;}
+.win-banner.tw h2{color:var(--tw-tx);}.win-banner.ma h2{color:var(--ma-tx);}.win-banner.ne h2{color:var(--ne-tx);}
+
+.lb-row{display:grid;grid-template-columns:32px 1fr auto auto;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--r);border-bottom:1px solid var(--b0);}
+.lb-row:last-child{border-bottom:none;}.lb-row:hover{background:var(--bg2);}.lb-row.lbf{background:rgba(201,169,110,.07);}
+.lb-rank{font-family:var(--disp);font-size:13px;font-weight:600;text-align:center;color:var(--text2);}
+.lb-rank.gld{color:var(--gold);}.lb-rank.slv{color:#aab0b8;}.lb-rank.brz{color:#c18a5a;}
+.lb-name{font-size:13px;font-weight:500;color:var(--text0);}
+.lb-pts{font-family:var(--disp);font-size:15px;font-weight:600;color:var(--text0);}
+
+.log-entry{font-size:12px;color:var(--text2);padding:5px 0;border-bottom:1px solid var(--b0);line-height:1.6;}
+.log-entry:last-child{border-bottom:none;}
+.log-night{color:#a0b4f0;}.log-day{color:var(--gold);}.log-death{color:var(--ma-tx);}.log-shuffle{color:var(--tw-tx);}.log-resolve{color:var(--gold);}
+
+.rotation-summary{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:10px 12px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r);font-size:12px;color:var(--text2);margin-top:12px;}
+.warn-text{color:var(--ma-tx);font-size:12px;margin-top:6px;}
+.role-section-hd{font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:12px 0 7px;border-bottom:1px solid var(--b1);margin-bottom:10px;font-family:var(--disp);}
+.role-section-hd.town{color:var(--tw-tx);}.role-section-hd.mafia{color:var(--ma-tx);}.role-section-hd.neutral{color:var(--ne-tx);}
+.role-chip-grid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px;}
+.role-chip{display:inline-flex;align-items:center;border:1px solid var(--b1);border-radius:20px;overflow:hidden;transition:border-color .12s;background:transparent;}
+.role-chip:hover{border-color:var(--b2);}
+.role-chip.sel-town{border-color:var(--tw-br);}.role-chip.sel-mafia{border-color:var(--ma-br);}.role-chip.sel-neutral{border-color:var(--ne-br);}
+.chip-name{font-size:11px;font-weight:500;padding:4px 8px;color:var(--text2);cursor:pointer;user-select:none;transition:color .12s;}
+.role-chip.sel-town .chip-name{color:var(--tw-tx);background:var(--tw-bg);}
+.role-chip.sel-mafia .chip-name{color:var(--ma-tx);background:var(--ma-bg);}
+.role-chip.sel-neutral .chip-name{color:var(--ne-tx);background:var(--ne-bg);}
+.chip-stepper{display:none;align-items:center;}
+.role-chip.sel-town .chip-stepper,.role-chip.sel-mafia .chip-stepper,.role-chip.sel-neutral .chip-stepper{display:inline-flex;}
+.chip-btn{display:flex;align-items:center;justify-content:center;width:22px;height:26px;background:transparent;border:none;cursor:pointer;font-size:13px;font-weight:500;color:var(--text2);transition:background .1s;padding:0;}
+.chip-btn:hover{background:var(--b0);}
+.chip-btn.minus:hover{color:var(--ma-tx);}
+.chip-btn.plus:hover{color:var(--tw-tx);}
+.chip-sep{width:1px;background:var(--b1);height:18px;flex-shrink:0;}
+.chip-val{min-width:20px;text-align:center;font-size:12px;font-weight:600;font-family:var(--disp);color:var(--text0);padding:0 2px;}
+
+.name-input-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.name-input-row{display:flex;align-items:center;gap:8px;}
+.name-input-row span{font-size:11px;color:var(--text3);min-width:18px;text-align:right;font-family:var(--disp);}
+
+.game-layout{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:12px;margin-bottom:12px;}
+
+.script-block{border:1px solid var(--b1);border-radius:var(--rl);overflow:hidden;margin-bottom:10px;}
+.script-block-hd{display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--bg2);border-bottom:1px solid var(--b1);}
+.snum{display:flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;font-size:10px;font-weight:600;flex-shrink:0;font-family:var(--disp);}
+.snum-night{background:rgba(30,40,100,.5);border:1px solid rgba(100,120,200,.4);color:#a0b4f0;}
+.snum-day{background:var(--gold-dim);border:1px solid var(--gold-border);color:var(--gold);}
+.sbt{font-size:12px;font-weight:500;font-family:var(--disp);letter-spacing:.04em;color:var(--text0);}
+.script-lines{padding:12px 14px;display:flex;flex-direction:column;gap:10px;}
+.sline{display:flex;gap:10px;align-items:flex-start;}
+.sicon{width:18px;height:18px;border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;margin-top:1px;}
+.icon-say{background:rgba(30,40,100,.4);border:1px solid rgba(100,120,200,.3);color:#a0b4f0;}
+.icon-wait{background:var(--gold-dim);border:1px solid var(--gold-border);color:var(--gold);}
+.icon-action{background:var(--tw-bg);border:1px solid var(--tw-br);color:var(--tw-tx);}
+.icon-note{background:var(--bg3);color:var(--text2);}
+.stext{font-size:13px;line-height:1.6;color:var(--text1);}
+.squote{font-style:italic;color:var(--text0);}
+.sdivider{height:1px;background:var(--b0);margin:2px 0;}
+.srt{display:inline-block;font-size:10px;font-weight:500;padding:1px 6px;border-radius:10px;margin-right:3px;vertical-align:middle;}
+.srt-town{background:var(--tw-bg);color:var(--tw-tx);}.srt-mafia{background:var(--ma-bg);color:var(--ma-tx);}.srt-neutral{background:var(--ne-bg);color:var(--ne-tx);}
+.no-script-msg{text-align:center;padding:32px 16px;color:var(--text2);font-size:13px;}
+
+@media(max-width:620px){.game-layout{grid-template-columns:1fr;}.player-row{grid-template-columns:22px 1fr 90px 72px 28px 28px;gap:5px;}}
+</style>
+</head>
+<body>
+
+<!-- SETUP -->
+<div id="screen-setup" class="screen active">
+  <div class="page-header">
+    <div class="header-crest">☽</div>
+    <div><h1>Town of Salem</h1><p style="font-size:13px;color:var(--text2);margin:0">Moderator control panel</p></div>
+  </div>
+  <div class="crimson-divider"></div>
+  <div class="setup-tabs">
+    <button class="setup-tab active" onclick="showSetupTab('players',this)">Players</button>
+    <button class="setup-tab" onclick="showSetupTab('roles',this)">Role rotation</button>
+  </div>
+  <div class="setup-panel active" id="stab-players">
+    <div class="card" style="margin-bottom:16px">
+      <div class="label">Number of players</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px" id="count-btns"></div>
+      <div class="label">Player names</div>
+      <div class="name-input-grid" id="name-inputs"></div>
+    </div>
+  </div>
+  <div class="setup-panel" id="stab-roles">
+    <div class="card" style="margin-bottom:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px">
+        <div style="font-size:13px;color:var(--text2)">Click a role name to add it. Use − and + to adjust the count.</div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-sm" onclick="applyPreset('beginner')">Beginner</button>
+          <button class="btn btn-sm" onclick="applyPreset('standard')">Standard</button>
+          <button class="btn btn-sm" onclick="applyPreset('chaos')">Chaos</button>
+          <button class="btn btn-sm btn-danger" onclick="clearRotation()">Clear</button>
+        </div>
+      </div>
+      <div id="rotation-summary" class="rotation-summary">No roles selected yet.</div>
+      <div class="role-section-hd town">Town</div>
+      <div class="role-chip-grid" id="chips-town"></div>
+      <div class="role-section-hd mafia">Mafia</div>
+      <div class="role-chip-grid" id="chips-mafia"></div>
+      <div class="role-section-hd neutral">Neutral</div>
+      <div class="role-chip-grid" id="chips-neutral"></div>
+    </div>
+  </div>
+  <div id="warn-count" style="height:28px;display:flex;align-items:center;padding:0 4px;font-size:12px;color:var(--ma-tx)"></div>
+  <button class="btn btn-primary" style="width:100%;padding:11px" onclick="startGame()">Begin</button>
+</div>
+
+<!-- GAME -->
+<div id="screen-game" class="screen">
+  <div class="page-header" style="margin-bottom:12px">
+    <div class="header-crest">☽</div>
+    <h1 style="font-size:18px">Town of Salem</h1>
+  </div>
+  <div class="crimson-divider" style="margin:0 0 16px"></div>
+  <div id="win-banner-zone"></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <span id="phase-pill" class="phase-pill phase-night">Night 1</span>
+      <div style="display:flex;gap:6px">
+        <div class="stat-mini"><div class="stat-val" id="stat-alive">-</div><div class="stat-lbl">alive</div></div>
+        <div class="stat-mini"><div class="stat-val" id="stat-dead">-</div><div class="stat-lbl">dead</div></div>
+        <div class="stat-mini"><div class="stat-val" id="stat-round">1</div><div class="stat-lbl">round</div></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button class="btn btn-sm btn-success" onclick="dealRoles()" id="deal-btn">Deal roles</button>
+      <button class="btn btn-sm" onclick="nextPhase()">Next phase</button>
+      <button class="btn btn-sm btn-danger" onclick="openEndGame()">End game</button>
+      <button class="btn btn-sm" onclick="resetGame()">Reset</button>
+    </div>
+  </div>
+
+  <div class="game-tabs">
+    <button class="game-tab active" onclick="showGameTab('players',this)">Players</button>
+    <button class="game-tab" onclick="showGameTab('night',this)">Night</button>
+    <button class="game-tab" onclick="showGameTab('script',this)">Script</button>
+    <button class="game-tab" onclick="showGameTab('wiki',this)">Role wiki</button>
+    <button class="game-tab" onclick="showGameTab('scores',this)">Leaderboard</button>
+    <button class="game-tab" onclick="showGameTab('log',this)">Log</button>
+  </div>
+
+  <!-- Players -->
+  <div class="game-panel active" id="gtab-players">
+    <div class="card" style="margin-bottom:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div class="label" style="margin:0">Players</div>
+        <div style="font-size:11px;color:var(--text2)" id="rotation-info"></div>
+      </div>
+      <div id="player-list"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="card">
+        <div class="label">Timer</div>
+        <div class="timer-display" id="timer-display">5:00</div>
+        <div style="font-size:12px;color:var(--text2);text-align:center;margin-top:6px">Discussion</div>
+        <div style="display:flex;gap:6px;margin-top:12px;justify-content:center;flex-wrap:wrap">
+          <button class="btn btn-sm" onclick="setTimer(300)">5 min</button>
+          <button class="btn btn-sm" onclick="setTimer(180)">3 min</button>
+          <button class="btn btn-sm" onclick="setTimer(30)">30 s</button>
+          <button class="btn btn-sm" onclick="toggleTimer()" id="timer-toggle-btn">Start</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="label">Day vote — eliminate player</div>
+        <select id="day-vote-select" style="margin-bottom:8px"><option value="">— select accused —</option></select>
+        <button class="btn btn-success" style="width:100%" onclick="dayEliminate()">⚖ Guilty — eliminate</button>
+        <div style="font-size:11px;color:var(--text2);margin-top:8px">Runs win check automatically. Jester auto-awarded.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Night -->
+  <div class="game-panel" id="gtab-night">
+    <div class="game-layout">
+      <div>
+        <div id="resolve-zone"></div>
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+            <div class="label" style="margin:0">Night actions</div>
+            <button class="btn btn-sm" onclick="initNightState();renderNightPanel()">Reset</button>
+          </div>
+          <div id="night-actions-body"></div>
+          <div class="commit-bar">
+            <button class="btn btn-primary" style="flex:1;padding:9px" onclick="resolveNight()">⚔ Resolve night</button>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="align-self:start">
+        <div class="label">Timer</div>
+        <div class="timer-display" id="timer-display-night">2:00</div>
+        <div style="font-size:12px;color:var(--text2);text-align:center;margin-top:6px">Night phase</div>
+        <div style="display:flex;gap:6px;margin-top:12px;justify-content:center;flex-wrap:wrap">
+          <button class="btn btn-sm" onclick="setTimer(120);syncTimers()">2 min</button>
+          <button class="btn btn-sm" onclick="setTimer(60);syncTimers()">1 min</button>
+          <button class="btn btn-sm" onclick="toggleTimer()" id="timer-toggle-btn-night">Start</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Script -->
+  <div class="game-panel" id="gtab-script">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+      <div style="font-size:13px;color:var(--text2)">Read aloud — auto-generated from your rotation.</div>
+      <button class="btn btn-sm" id="script-phase-btn" onclick="toggleScriptPhase()">Show day script</button>
+    </div>
+    <div id="script-body"></div>
+  </div>
+
+  <!-- Wiki -->
+  <div class="game-panel" id="gtab-wiki">
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap" id="wiki-faction-btns">
+      <button class="btn btn-sm wiki-f-btn active-wiki" data-f="all" onclick="setWikiFaction('all',this)">All roles</button>
+      <button class="btn btn-sm wiki-f-btn" data-f="town" onclick="setWikiFaction('town',this)" style="border-color:var(--tw-br);color:var(--tw-tx)">Town</button>
+      <button class="btn btn-sm wiki-f-btn" data-f="mafia" onclick="setWikiFaction('mafia',this)" style="border-color:var(--ma-br);color:var(--ma-tx)">Mafia</button>
+      <button class="btn btn-sm wiki-f-btn" data-f="neutral" onclick="setWikiFaction('neutral',this)" style="border-color:var(--ne-br);color:var(--ne-tx)">Neutral</button>
+    </div>
+    <div id="wiki-body"></div>
+  </div>
+
+  <!-- Leaderboard -->
+  <div class="game-panel" id="gtab-scores">
+    <div class="card" style="margin-bottom:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div class="label" style="margin:0">Running leaderboard</div>
+        <div style="font-size:11px;color:var(--text2)" id="lb-game-count"></div>
+      </div>
+      <div id="leaderboard-body"></div>
+    </div>
+    <div class="card"><div class="label">Scoring guide</div><div id="scoring-guide"></div></div>
+  </div>
+
+  <!-- Log -->
+  <div class="game-panel" id="gtab-log">
+    <div class="card"><div class="label">Game log</div><div id="game-log" style="max-height:500px;overflow-y:auto"></div></div>
+  </div>
+</div>
+
+<script>
+/* DATA */
+const ROLES_DEF={
+  town:['Sheriff','Doctor','Investigator','Vigilante','Escort','Lookout','Mayor','Medium','Transporter','Veteran','Tracker','Spy','Crusader','Psychic','Retributionist','Amnesiac','Survivor','Town (basic)'],
+  mafia:['Godfather','Mafioso','Consigliere','Consort','Blackmailer','Janitor','Disguiser','Forger','Framer','Hypnotist','Mafia (basic)'],
+  neutral:['Jester','Serial Killer','Arsonist','Executioner','Witch','Pirate','Vampire','Guardian Angel']
+};
+const ALL_ROLES=['(unassigned)',...ROLES_DEF.town,...ROLES_DEF.mafia,...ROLES_DEF.neutral];
+const FX=r=>ROLES_DEF.town.includes(r)?'town':ROLES_DEF.mafia.includes(r)?'mafia':ROLES_DEF.neutral.includes(r)?'neutral':'';
+const MAFIA_SET=new Set(['Godfather','Mafioso','Consigliere','Consort','Blackmailer','Janitor','Disguiser','Forger','Framer','Hypnotist','Mafia (basic)']);
+const HOSTILE_NEUTRAL=new Set(['Serial Killer','Arsonist','Vampire']);
+const MAX_CP={town:10,mafia:6,neutral:4};
+const PRESETS={
+  beginner:{town:{Sheriff:1,Doctor:1,Investigator:1,Vigilante:1,'Town (basic)':5},mafia:{Godfather:1,Mafioso:1,'Mafia (basic)':1},neutral:{Jester:1,Executioner:1}},
+  standard:{town:{Sheriff:1,Doctor:1,Investigator:1,Vigilante:1,Escort:1,Lookout:1,Mayor:1,'Town (basic)':2},mafia:{Godfather:1,Mafioso:1,Consigliere:1,Consort:1},neutral:{Jester:1,Executioner:1}},
+  chaos:{town:{Sheriff:1,Doctor:1,Investigator:1,Vigilante:1,Escort:1,Lookout:1,Veteran:1,Transporter:1},mafia:{Godfather:1,Mafioso:1,Consigliere:1,Blackmailer:1,Janitor:1},neutral:{Jester:1,'Serial Killer':1,Executioner:1,Witch:1}}
+};
+const WIN_PTS={Sheriff:4,Doctor:4,Investigator:4,Vigilante:5,Escort:3,Lookout:3,Mayor:4,Medium:3,Transporter:4,Veteran:5,Tracker:3,Spy:4,Crusader:4,Psychic:4,Retributionist:5,Amnesiac:4,Survivor:3,'Town (basic)':3,Godfather:6,Mafioso:5,Consigliere:6,Consort:5,Blackmailer:5,Janitor:6,Disguiser:6,Forger:6,Framer:5,Hypnotist:5,'Mafia (basic)':4,Jester:8,'Serial Killer':9,Arsonist:9,Executioner:7,Witch:7,Pirate:8,Vampire:7,'Guardian Angel':5};
+
+/* STATE */
+let rotation={},players=[],phase='night',round=1,timerSec=300,timerRunning=false,timerInterval=null,log=[],playerCount=14,scriptPhase='night',ns={},lb={},gameCount=0,gameOver=false;
+
+/* SETUP TABS */
+function showSetupTab(id,btn){document.querySelectorAll('.setup-tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.setup-panel').forEach(p=>p.classList.remove('active'));btn.classList.add('active');document.getElementById('stab-'+id).classList.add('active');}
+function showGameTab(id,btn){
+  document.querySelectorAll('.game-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.game-panel').forEach(p=>p.classList.remove('active'));
+  // btn may be a DOM element or null — find the right tab button by its onclick
+  const tabBtn=btn&&btn.classList?btn:document.querySelector(`.game-tab[onclick*="'${id}'"]`);
+  if(tabBtn) tabBtn.classList.add('active');
+  const panel=document.getElementById('gtab-'+id);if(panel) panel.classList.add('active');
+  if(id==='script')renderScript();
+  if(id==='scores')renderLeaderboard();
+  if(id==='wiki')renderWiki();
+}
+
+function buildSetup(){
+  const g=document.getElementById('name-inputs');g.innerHTML='';
+  for(let i=1;i<=16;i++){const r=document.createElement('div');r.className='name-input-row';const d=i>playerCount?'disabled style="opacity:.4"':'';r.innerHTML=`<span>${i}</span><input type="text" placeholder="Player ${i}" id="pname-${i}" ${d}>`;g.appendChild(r);}
+  const cb=document.getElementById('count-btns');cb.innerHTML='';
+  [13,14,15,16].forEach(n=>{const b=document.createElement('button');b.className='btn btn-sm'+(n===playerCount?' btn-primary':'');b.textContent=n+' players';b.onclick=()=>{playerCount=n;buildSetup();updateRS();};cb.appendChild(b);});
+}
+function buildRoleChips(){
+  ['town','mafia','neutral'].forEach(f=>{
+    const g=document.getElementById('chips-'+f);g.innerHTML='';
+    ROLES_DEF[f].forEach(role=>{
+      const c=document.createElement('div');
+      c.className='role-chip';
+      c.id='ch-'+role.replace(/[\s()]/g,'_');
+      c.innerHTML=chipHTML(role,f,0);
+      g.appendChild(c);
+    });
+  });
+}
+
+function chipHTML(role,f,count){
+  const sel=count>0?` sel-${f}`:'';
+  return `<span class="chip-name" onclick="chipAdd('${role}','${f}')">${role}</span>`+
+    `<div class="chip-stepper">`+
+    `<div class="chip-sep"></div>`+
+    `<button class="chip-btn minus" onclick="chipDec('${role}','${f}')">−</button>`+
+    `<span class="chip-val">${count}</span>`+
+    `<button class="chip-btn plus" onclick="chipAdd('${role}','${f}')">+</button>`+
+    `</div>`;
+}
+
+function refreshChip(role,f){
+  const c=document.getElementById('ch-'+role.replace(/[\s()]/g,'_'));if(!c)return;
+  const count=rotation[role]||0;
+  c.className='role-chip'+(count>0?` sel-${f}`:'');
+  c.innerHTML=chipHTML(role,f,count);
+}
+
+function chipAdd(role,f){
+  const max=MAX_CP[f];
+  const cur=rotation[role]||0;
+  if(cur>=max)return;
+  rotation[role]=(cur+1);
+  refreshChip(role,f);updateRS();
+}
+
+function chipDec(role,f){
+  const cur=rotation[role]||0;
+  if(cur<=0)return;
+  if(cur===1){delete rotation[role];}
+  else{rotation[role]=cur-1;}
+  refreshChip(role,f);updateRS();
+}
+
+function syncChip(role,f,n){
+  if(n<=0){delete rotation[role];}else{rotation[role]=n;}
+  refreshChip(role,f);
+}
+
+function toggleRole(){} // legacy stub — no longer used directly
+function clearRotation(){rotation={};buildRoleChips();updateRS();}
+function applyPreset(name){
+  rotation={};
+  buildRoleChips(); // reset all chips to zero first
+  const p=PRESETS[name];
+  ['town','mafia','neutral'].forEach(f=>{
+    Object.entries(p[f]||{}).forEach(([role,cnt])=>{
+      rotation[role]=cnt;
+      refreshChip(role,f);
+    });
+  });
+  updateRS();
+}
+function rotTotal(){return Object.values(rotation).reduce((s,n)=>s+n,0);}
+function updateRS(){
+  const tot=rotTotal(),tc=obj_sum('town'),mc=obj_sum('mafia'),nc=obj_sum('neutral');
+  const el=document.getElementById('rotation-summary'),w=document.getElementById('warn-count');
+  if(tot===0){el.innerHTML='No roles selected yet.';if(w)w.textContent='';return;}
+  el.innerHTML=`<strong>${tot} roles</strong> &nbsp;·&nbsp; <span style="color:var(--tw-tx)">${tc}T</span> &nbsp;·&nbsp; <span style="color:var(--ma-tx)">${mc}M</span> &nbsp;·&nbsp; <span style="color:var(--ne-tx)">${nc}N</span>`;
+  if(w){
+    if(tot<playerCount) w.textContent=`${playerCount-tot} fewer roles than players — add ${playerCount-tot} more.`;
+    else if(tot>playerCount) w.textContent=`${tot-playerCount} more roles than players — remove ${tot-playerCount}.`;
+    else w.textContent='';
+  }
+}
+function obj_sum(f){return Object.entries(rotation).filter(([r])=>FX(r)===f).reduce((s,[,n])=>s+n,0);}
+
+/* GAME */
+function startGame(){
+  players=[];for(let i=1;i<=playerCount;i++){const v=document.getElementById('pname-'+i)?.value.trim()||'Player '+i;players.push({id:i,name:v,role:'(unassigned)',alive:true});}
+  phase='night';round=1;log=[];gameOver=false;initNightState();
+  addLog('Game started — '+players.length+' players.','');addLog('Night 1 begins.','night');
+  document.getElementById('screen-setup').classList.remove('active');document.getElementById('screen-game').classList.add('active');
+  renderGame();renderLeaderboard();document.getElementById('win-banner-zone').innerHTML='';
+}
+function resetGame(){stopTimer();document.getElementById('screen-game').classList.remove('active');document.getElementById('screen-setup').classList.add('active');}
+function shuffle(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}return arr;}
+function dealRoles(){const pool=[];Object.entries(rotation).forEach(([role,count])=>{for(let i=0;i<count;i++)pool.push(role);});shuffle(pool);players.forEach((p,i)=>{p.role=pool[i]||'(unassigned)';});addLog('Roles dealt randomly.','shuffle');initNightState();renderGame();}
+
+function renderGame(){
+  const alive=players.filter(p=>p.alive).length;
+  document.getElementById('stat-alive').textContent=alive;
+  document.getElementById('stat-dead').textContent=players.length-alive;
+  document.getElementById('stat-round').textContent=round;
+  const pill=document.getElementById('phase-pill');pill.textContent=(phase==='night'?'Night ':'Day ')+round;pill.className='phase-pill '+(phase==='night'?'phase-night':'phase-day');
+  document.getElementById('deal-btn').style.display=rotTotal()>0?'inline-flex':'none';
+  const ri=document.getElementById('rotation-info');if(ri)ri.textContent=rotTotal()?`${obj_sum('town')}T · ${obj_sum('mafia')}M · ${obj_sum('neutral')}N`:'';
+  renderPlayerList();renderLog();syncTimers();renderNightPanel();updateDayVoteSelect();
+}
+
+function renderPlayerList(){
+  const list=document.getElementById('player-list');if(!list)return;list.innerHTML='';const hr=rotTotal()>0;
+  players.forEach(p=>{
+    const f=FX(p.role),row=document.createElement('div');row.className='player-row'+(p.alive?'':' dead');
+    const tag=f?`<span class="tag tag-${f}">${p.role}</span>`:`<span style="font-size:11px;color:var(--text2)">${p.role}</span>`;
+    row.innerHTML=`<span class="player-num">${p.id}</span><span class="player-name${p.alive?'':' dead'}">${p.name}</span>
+      <select onchange="setRole(${p.id},this.value)" style="font-size:12px;padding:4px 6px">${ALL_ROLES.map(r=>`<option value="${r}"${p.role===r?' selected':''}>${r}</option>`).join('')}</select>
+      <span>${tag}</span>
+      <button class="btn btn-sm" onclick="rerollOne(${p.id})" style="padding:3px 7px;font-size:13px" ${hr?'':'disabled'}>↺</button>
+      <button class="btn btn-sm${p.alive?' btn-danger':''}" onclick="toggleAlive(${p.id})" style="padding:3px 7px;font-size:14px">${p.alive?'✕':'+'}</button>`;
+    list.appendChild(row);
+  });
+}
+
+function setRole(id,r){const p=players.find(x=>x.id===id);if(p){p.role=r;initNightState();renderGame();}}
+function rerollOne(id){const pool=[];Object.entries(rotation).forEach(([r,n])=>{for(let i=0;i<n;i++)pool.push(r);});if(!pool.length)return;const p=players.find(x=>x.id===id);if(!p)return;const o=p.role;p.role=pool[Math.floor(Math.random()*pool.length)];addLog(`${p.name}: ${o} → ${p.role}`,'shuffle');initNightState();renderGame();}
+function toggleAlive(id){const p=players.find(x=>x.id===id);if(!p)return;p.alive=!p.alive;addLog(p.alive?`${p.name} revived.`:`${p.name} (${p.role}) eliminated.`,p.alive?'':'death');renderGame();checkWin();}
+
+function nextPhase(){
+  if(phase==='night'){phase='day';addLog(`Day ${round} — discussion open.`,'day');}
+  else{phase='night';round++;addLog(`Night ${round} begins.`,'night');initNightState();const rz=document.getElementById('resolve-zone');if(rz)rz.innerHTML='';}
+  stopTimer();setTimer(phase==='night'?120:300);scriptPhase=phase;renderGame();
+}
+
+function updateDayVoteSelect(){const s=document.getElementById('day-vote-select');if(!s)return;const a=players.filter(p=>p.alive);s.innerHTML='<option value="">— select accused —</option>'+a.map(p=>`<option value="${p.id}">${p.name} (${p.role})</option>`).join('');}
+
+function dayEliminate(){
+  const s=document.getElementById('day-vote-select');const pid=parseInt(s?.value);if(!pid)return;
+  const p=players.find(x=>x.id===pid);if(!p)return;
+  p.alive=false;
+  if(p.role==='Jester'){
+    addLog(`⚖ ${p.name} was hanged — they were the Jester! 🃏`,'death');
+    creditPlayer(p.name,WIN_PTS['Jester'],'🃏 Jester lynched by the town');
+    ensureLB(p.name).achievements.push('🃏');
+    addLog(`🃏 ${p.name} completes their quest — wins as Jester!`,'shuffle');
+  } else {
+    addLog(`⚖ ${p.name} was found guilty. They were the ${p.role}.`,'death');
+  }
+  renderGame();checkWin();s.value='';
+}
+
+/* NIGHT STATE */
+function initNightState(){
+  ns={mafiaKill:'',doctorHeal:'',escortBlock:'',consortBlock:'',vigilanteShoot:'',skKill:'',vetAlert:false,
+    consiTarget:'',blackmailTarget:'',janitorClean:false,framerTarget:'',witchControl:'',witchForced:'',
+    transportSwap1:'',transportSwap2:'',pirateTarget:'',vampireConvert:'',crusaderProtect:'',
+    arsonistTarget:'',arsonistIgnite:false,guardianTarget:'',survivorVest:false,lookoutWatch:'',trackerWatch:'',
+    sheriffTarget:'',investTarget:'',retroTarget:''};
+}
+
+function pOpts(){const a=players.filter(p=>p.alive);return`<option value="">— choose —</option>`+a.map(p=>`<option value="${p.name}">${p.name}</option>`).join('');}
+
+/* NIGHT PANEL */
+function renderNightPanel(){
+  const body=document.getElementById('night-actions-body');if(!body)return;
+  const alive=players.filter(p=>p.alive),aliveRoles=new Set(alive.map(p=>p.role)),opts=pOpts();
+  const mafiaAlive=alive.filter(p=>MAFIA_SET.has(p.role));
+  function mkCard(fac,emoji,title,members,inner,note=''){
+    const bg=fac==='mafia'?'var(--ma-bg)':fac==='town'?'var(--tw-bg)':'var(--ne-bg)';
+    const bc=fac==='mafia'?'var(--ma-br)':fac==='town'?'var(--tw-br)':'var(--ne-br)';
+    const col=fac==='mafia'?'var(--ma-tx)':fac==='town'?'var(--tw-tx)':'var(--ne-tx)';
+    const mem=members.length?`<div class="na-members">${members.map(p=>`<span style="color:${col}">${p.name} (${p.role})</span>`).join(' · ')}</div>`:'';
+    return`<div class="na-card"><div class="na-card-hd" style="background:${bg};border-bottom:1px solid ${bc}"><span class="na-emoji">${emoji}</span><span class="na-role" style="color:${col}">${title}</span></div>${mem}${inner}${note?`<div class="na-note">${note}</div>`:''}</div>`;
+  }
+  function tRow(key,lbl,o=opts){return`<div class="na-body"><span style="font-size:11px;color:var(--text2);min-width:80px">${lbl}</span><select style="flex:1;font-size:12px;padding:4px 6px" onchange="ns.${key}=this.value">${o}</select></div>`;}
+  function chk(key,lbl){return`<div class="na-body"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--text1)"><input type="checkbox" onchange="ns.${key}=this.checked" style="width:16px;height:16px;accent-color:var(--cr-bright)"> ${lbl}</label></div>`;}
+
+  let html='';
+
+  // ── MAFIA — one shared kill card ──
+  if(mafiaAlive.length){
+    html+=`<div class="na-section-hd mhd">Mafia</div>`;
+    // One unified kill decision
+    html+=mkCard('mafia','🔪','Mafia kill — shared decision',mafiaAlive,tRow('mafiaKill','Kill target'));
+    if(aliveRoles.has('Janitor')) html+=mkCard('mafia','🧹','Janitor',alive.filter(p=>p.role==='Janitor'),chk('janitorClean','Clean the kill target\'s body (hide role on death)'));
+    if(aliveRoles.has('Consigliere')) html+=mkCard('mafia','🔎','Consigliere',alive.filter(p=>p.role==='Consigliere'),tRow('consiTarget','Investigate'));
+    if(aliveRoles.has('Consort')) html+=mkCard('mafia','🚫','Consort',alive.filter(p=>p.role==='Consort'),tRow('consortBlock','Roleblock'));
+    if(aliveRoles.has('Blackmailer')) html+=mkCard('mafia','🤐','Blackmailer',alive.filter(p=>p.role==='Blackmailer'),tRow('blackmailTarget','Blackmail'));
+    if(aliveRoles.has('Framer')) html+=mkCard('mafia','🖼️','Framer',alive.filter(p=>p.role==='Framer'),tRow('framerTarget','Frame'));
+  }
+
+  // ── NEUTRAL ──
+  const hasN=['Vampire','Serial Killer','Arsonist','Witch','Pirate'].some(r=>aliveRoles.has(r));
+  if(hasN){
+    html+=`<div class="na-section-hd nhd">Neutral</div>`;
+    if(aliveRoles.has('Vampire')) html+=mkCard('neutral','🧛','Vampire',alive.filter(p=>p.role==='Vampire'),tRow('vampireConvert','Convert'));
+    if(aliveRoles.has('Serial Killer')) html+=mkCard('neutral','🔪','Serial Killer',alive.filter(p=>p.role==='Serial Killer'),tRow('skKill','Kill'));
+    if(aliveRoles.has('Arsonist')) html+=mkCard('neutral','🔥','Arsonist',alive.filter(p=>p.role==='Arsonist'),tRow('arsonistTarget','Douse')+chk('arsonistIgnite','Ignite all doused players instead'));
+    if(aliveRoles.has('Witch')) html+=mkCard('neutral','🧙','Witch',alive.filter(p=>p.role==='Witch'),tRow('witchControl','Control (player 1)')+tRow('witchForced','Force target (player 2)'),'Player 1 is controlled; their action is redirected at player 2');
+    if(aliveRoles.has('Pirate')) html+=mkCard('neutral','🏴‍☠️','Pirate',alive.filter(p=>p.role==='Pirate'),tRow('pirateTarget','Duel'));
+  }
+
+  // ── TOWN ──
+  const townActs=['Escort','Transporter','Veteran','Crusader','Vigilante','Lookout','Tracker','Spy','Sheriff','Investigator','Psychic','Doctor','Survivor','Guardian Angel','Retributionist','Medium','Amnesiac'];
+  const hasT=townActs.some(r=>aliveRoles.has(r));
+  if(hasT){
+    html+=`<div class="na-section-hd thd">Town</div>`;
+    if(aliveRoles.has('Escort')) html+=mkCard('town','🚫','Escort',alive.filter(p=>p.role==='Escort'),tRow('escortBlock','Roleblock'));
+    if(aliveRoles.has('Transporter')) html+=mkCard('town','🔀','Transporter',alive.filter(p=>p.role==='Transporter'),tRow('transportSwap1','Swap player 1')+tRow('transportSwap2','Swap player 2'));
+    if(aliveRoles.has('Veteran')) html+=mkCard('town','🪖','Veteran',alive.filter(p=>p.role==='Veteran'),chk('vetAlert','Go on alert — kills all visitors tonight'));
+    if(aliveRoles.has('Crusader')) html+=mkCard('town','⚔️','Crusader',alive.filter(p=>p.role==='Crusader'),tRow('crusaderProtect','Protect'));
+    if(aliveRoles.has('Vigilante')) html+=mkCard('town','🔫','Vigilante',alive.filter(p=>p.role==='Vigilante'),tRow('vigilanteShoot','Shoot'),'Leave blank to abstain. Killing a Townie = guilt next night.');
+    if(aliveRoles.has('Lookout')) html+=mkCard('town','👁️','Lookout',alive.filter(p=>p.role==='Lookout'),tRow('lookoutWatch','Watch'));
+    if(aliveRoles.has('Tracker')) html+=mkCard('town','👣','Tracker',alive.filter(p=>p.role==='Tracker'),tRow('trackerWatch','Track'));
+    if(aliveRoles.has('Spy')){const ml=mafiaAlive.length?mafiaAlive.map(p=>`${p.name} (${p.role})`).join(', '):'none';html+=mkCard('town','🕵️','Spy',alive.filter(p=>p.role==='Spy'),`<div class="na-body" style="gap:8px"><span style="font-size:11px;color:var(--text2)">Reveal to Spy:</span><span style="font-size:12px;color:var(--ma-tx)">${ml}</span></div>`);}
+    if(aliveRoles.has('Sheriff')) html+=mkCard('town','⭐','Sheriff',alive.filter(p=>p.role==='Sheriff'),tRow('sheriffTarget','Investigate'),'Godfather always appears Innocent');
+    if(aliveRoles.has('Investigator')) html+=mkCard('town','🔍','Investigator',alive.filter(p=>p.role==='Investigator'),tRow('investTarget','Investigate'),'Show 3-role group clue card');
+    if(aliveRoles.has('Psychic')) html+=mkCard('town','🔮','Psychic',alive.filter(p=>p.role==='Psychic'),`<div class="na-note">${round%2===1?'Odd night: show 3 players, 1 is evil.':'Even night: show 3 players, 1 is good.'}</div>`);
+    if(aliveRoles.has('Doctor')) html+=mkCard('town','💊','Doctor',alive.filter(p=>p.role==='Doctor'),tRow('doctorHeal','Heal'),'Self-heal allowed once');
+    if(aliveRoles.has('Guardian Angel')) html+=mkCard('town','😇','Guardian Angel',alive.filter(p=>p.role==='Guardian Angel'),tRow('guardianTarget','Protect'));
+    if(aliveRoles.has('Survivor')) html+=mkCard('town','🛡️','Survivor',alive.filter(p=>p.role==='Survivor'),chk('survivorVest','Use bulletproof vest tonight (limited)'));
+    if(aliveRoles.has('Medium')) html+=mkCard('town','💬','Medium',alive.filter(p=>p.role==='Medium'),'<div class="na-note">Pass a written note from one dead player to the Medium privately.</div>');
+    if(aliveRoles.has('Retributionist')) html+=mkCard('town','⚡','Retributionist',alive.filter(p=>p.role==='Retributionist'),tRow('retroTarget','Use ability on'));
+    if(aliveRoles.has('Amnesiac')) html+=mkCard('town','🧩','Amnesiac',alive.filter(p=>p.role==='Amnesiac'),'<div class="na-note">Player secretly picks a dead role card to become. Reveal to you only.</div>');
+  }
+
+  if(!html) html='<div style="font-size:12px;color:var(--text2);padding:8px 0">No roles with night abilities in play.</div>';
+  body.innerHTML=html;
+}
+
+/* RESOLUTION ENGINE */
+function resolveNight(){
+  const events=[];
+  const killed=new Set(),saved=new Set(),blocked=new Set();
+
+  // 1. Blocks
+  if(ns.escortBlock) blocked.add(ns.escortBlock);
+  if(ns.consortBlock) blocked.add(ns.consortBlock);
+
+  // 2. Saves (Doctor, Guardian Angel, Survivor vest, Crusader)
+  if(ns.doctorHeal) saved.add(ns.doctorHeal);
+  if(ns.guardianTarget) saved.add(ns.guardianTarget);
+  if(ns.crusaderProtect) saved.add(ns.crusaderProtect);
+  if(ns.survivorVest){const sv=players.find(p=>p.alive&&p.role==='Survivor');if(sv)saved.add(sv.name);}
+
+  // 3. Veteran alert
+  if(ns.vetAlert){const vt=players.find(p=>p.alive&&p.role==='Veteran');if(vt) events.push({icon:'🪖',main:`${vt.name} (Veteran) is on alert`,sub:'Anyone who visits the Veteran tonight is killed by them.'});}
+
+  // 4. Mafia kill — one decision, one outcome
+  if(ns.mafiaKill){
+    const t=ns.mafiaKill,tp=players.find(p=>p.name===t);
+    const mafiaMember=players.find(p=>p.alive&&MAFIA_SET.has(p.role));
+    if(saved.has(t)){
+      const doc=players.find(p=>p.alive&&p.role==='Doctor');
+      events.push({icon:'💊',main:`${t} was attacked but survived`,sub:'The Doctor\'s heal saved them from the Mafia kill.',pts:doc?{who:doc.name,amt:3,desc:'💊 Doctor saved someone from the Mafia'}:null,ach:doc?{who:doc.name,em:'💊'}:null});
+    } else if(blocked.has(mafiaMember?.name||'')){
+      events.push({icon:'🚫',main:'Mafia kill was blocked',sub:`The killer was roleblocked by Escort/Consort.`});
+    } else {
+      killed.add(t);
+      const cleaned=ns.janitorClean;
+      events.push({icon:'🔪',main:`${t} was killed by the Mafia`,sub:cleaned?`Body cleaned — role hidden. (Actual role: ${tp?.role||'?'})`:`They were the ${tp?.role||'?'}.`,death:t});
+      // Auto-detect Mafia kills Sheriff or Doctor
+      if(tp?.role==='Sheriff'||tp?.role==='Doctor'){
+        events.push({icon:'🔪',main:`Mafia eliminated the ${tp.role}`,sub:'Bonus points to the Mafia.',pts:mafiaMember?{who:mafiaMember.name,amt:3,desc:`🔪 Mafia killed the ${tp.role}`}:null,ach:mafiaMember?{who:mafiaMember.name,em:'🔪'}:null});
+      }
+    }
+  }
+
+  // 5. Serial Killer
+  if(ns.skKill){const t=ns.skKill,tp=players.find(p=>p.name===t);
+    if(saved.has(t)){events.push({icon:'🛡️',main:`${t} survived a Serial Killer attack`,sub:'Protected or healed.'});}
+    else{killed.add(t);events.push({icon:'🔪',main:`${t} was killed by the Serial Killer`,sub:`They were the ${tp?.role||'?'}.`,death:t});}
+  }
+
+  // 6. Vigilante
+  if(ns.vigilanteShoot){const t=ns.vigilanteShoot,tp=players.find(p=>p.name===t);const vig=players.find(p=>p.alive&&p.role==='Vigilante');
+    if(saved.has(t)){events.push({icon:'🛡️',main:`${t} survived the Vigilante's shot`,sub:'Healed or protected.'});}
+    else{
+      killed.add(t);
+      const evil=FX(tp?.role||'')!=='town';
+      events.push({icon:'🔫',main:`${t} was shot by the Vigilante`,sub:`They were the ${tp?.role||'?'}.${evil?'':" Vigilante killed a Townie — guilt sets in."}`,death:t,
+        pts:evil&&vig?{who:vig.name,amt:4,desc:'🔫 Vigilante correctly killed Mafia/Neutral'}:null,ach:evil&&vig?{who:vig.name,em:'🔫'}:null});
+      if(!evil) events.push({icon:'😔',main:'Vigilante killed a Town member',sub:'They will die of guilt next night.'});
+    }
+  }
+
+  // 7. Arsonist
+  if(ns.arsonistIgnite) events.push({icon:'🔥',main:'Arsonist ignites all doused players',sub:'Resolve who was doused and mark them as killed.'});
+  else if(ns.arsonistTarget) events.push({icon:'🔥',main:`${ns.arsonistTarget} was doused`,sub:'Mark them as doused — they die when the Arsonist ignites.'});
+
+  // 8. Vampire convert
+  if(ns.vampireConvert) events.push({icon:'🧛',main:`${ns.vampireConvert} was bitten`,sub:'They are now a Vampire. Update their role card.'});
+
+  // 9. Pirate duel
+  if(ns.pirateTarget) events.push({icon:'🏴‍☠️',main:`Pirate duels ${ns.pirateTarget}`,sub:'Play out the duel — Pirate win = target dies.'});
+
+  // 10. Consigliere
+  if(ns.consiTarget){const tp=players.find(p=>p.name===ns.consiTarget);events.push({icon:'🔎',main:`Consigliere investigates ${ns.consiTarget}`,sub:`Whisper their exact role: ${tp?.role||'?'}`});}
+
+  // 11. Lookout / Tracker
+  if(ns.lookoutWatch) events.push({icon:'👁️',main:`Lookout watched ${ns.lookoutWatch}`,sub:'Whisper: tell them who visited that player tonight (any attacker, Doctor, Escort, etc.).'});
+  if(ns.trackerWatch) events.push({icon:'👣',main:`Tracker tracked ${ns.trackerWatch}`,sub:'Whisper: tell them which player this person visited tonight (if any).'});
+
+  // Apply deaths
+  killed.forEach(name=>{const p=players.find(x=>x.name===name);if(p)p.alive=false;});
+
+  // Render
+  const zone=document.getElementById('resolve-zone');
+  if(zone){
+    if(!events.length){zone.innerHTML='';}
+    else{zone.innerHTML=`<div class="resolve-card"><div class="resolve-hd"><span style="font-size:16px">⚔️</span><span class="resolve-hd-title">Night ${round} — resolution</span></div>`+
+      events.map(e=>`<div class="resolve-event"><div class="re-icon">${e.icon}</div><div style="flex:1"><div class="re-main">${e.main}</div><div class="re-sub">${e.sub||''}</div></div>${e.pts?`<div class="re-pts">+${e.pts.amt}pts</div>`:''}</div>`).join('')+'</div>';}
+  }
+
+  // Award auto-detected points
+  events.forEach(e=>{
+    if(e.death) addLog(`☠ ${e.death} was killed.`,'death');
+    else addLog(`⚔ ${e.main}`,'resolve');
+    if(e.pts) creditPlayer(e.pts.who,e.pts.amt,e.pts.desc);
+    if(e.ach){ensureLB(e.ach.who);if(!lb[e.ach.who].achievements.includes(e.ach.em))lb[e.ach.who].achievements.push(e.ach.em);}
+  });
+
+  renderGame();checkWin();
+}
+
+/* WIN CHECKER */
+function checkWin(){
+  if(gameOver)return;
+  const a=players.filter(p=>p.alive);
+  if(!a.length)return;
+  const am=a.filter(p=>MAFIA_SET.has(p.role));
+  const hn=a.filter(p=>HOSTILE_NEUTRAL.has(p.role));
+  const nonMafia=a.filter(p=>!MAFIA_SET.has(p.role));
+  const at=a.filter(p=>FX(p.role)==='town');
+
+  // Mafia wins: equal or outnumber all non-Mafia and no hostile neutrals threaten them
+  if(am.length>0&&am.length>=nonMafia.length){
+    doWin('mafia',am,'The Mafia wins','They equal or outnumber all remaining players.');
+  }
+  // Town wins: all Mafia AND all hostile neutrals eliminated, at least one Town alive
+  else if(am.length===0&&hn.length===0&&at.length>0){
+    doWin('town',at,'The Town wins','All threats have been eliminated.');
+  }
+  // Sole hostile neutral wins (e.g. Serial Killer last standing)
+  else if(hn.length>0&&a.length===hn.length){
+    doWin('neutral',hn,`${hn[0].role} wins`,'The last killer standing.');
+  }
+}
+
+function doWin(fac,winners,label,sub){
+  gameOver=true;
+  const cls={town:'tw',mafia:'ma',neutral:'ne'}[fac];
+  const names=winners.map(p=>`<strong>${p.name}</strong> (${p.role})`).join(', ');
+  document.getElementById('win-banner-zone').innerHTML=`<div class="win-banner ${cls}"><h2>${label}</h2><p style="font-size:13px;color:var(--text2);margin-bottom:8px">${sub}</p><p style="font-size:13px;color:var(--text1);margin-bottom:16px">${names||'—'}</p><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="btn btn-gold" onclick="newRound()">New round (same players)</button><button class="btn btn-sm" onclick="showGameTab('scores',null)">Leaderboard</button><button class="btn btn-sm btn-danger" onclick="resetGame()">Full reset</button></div></div>`;
+  addLog(`🏆 ${label}!`,'shuffle');
+  // Award wins and finalise game
+  winners.forEach(p=>creditPlayer(p.name,WIN_PTS[p.role]||3,`🏆 ${label} as ${p.role}`));
+  gameCount++;
+  Object.values(lb).forEach(d=>{if((d.gamePts||0)>0){d.history=d.history||[];d.history.push(d.gamePts);d.games=(d.games||0)+1;}d.gamePts=0;});
+  renderLeaderboard();
+}
+
+function openEndGame(){
+  document.getElementById('win-banner-zone').innerHTML=`<div class="win-banner ne" style="padding:16px;margin-bottom:16px">
+    <h2 style="margin-bottom:8px">Declare winner</h2>
+    <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+      <button class="btn btn-gold" onclick="doWin('town',players.filter(p=>p.alive&&FX(p.role)==='town'),'The Town wins','Declared by moderator.')">🌿 Town</button>
+      <button class="btn btn-danger" onclick="doWin('mafia',players.filter(p=>p.alive&&MAFIA_SET.has(p.role)),'The Mafia wins','Declared by moderator.')">🔪 Mafia</button>
+      <button class="btn btn-gold" onclick="doWin('neutral',players.filter(p=>p.alive&&FX(p.role)==='neutral'),'Neutral wins','Declared by moderator.')">☽ Neutral</button>
+      <button class="btn btn-sm" onclick="document.getElementById('win-banner-zone').innerHTML=''">Cancel</button>
+    </div></div>`;
+}
+
+function newRound(){
+  const names=players.map(p=>p.name);
+  players=names.map((name,i)=>({id:i+1,name,role:'(unassigned)',alive:true}));
+  phase='night';round=1;log=[];gameOver=false;
+  initNightState();
+  const rz=document.getElementById('resolve-zone');if(rz)rz.innerHTML='';
+  document.getElementById('win-banner-zone').innerHTML='';
+  addLog(`Round ${gameCount+1} begins.`,'');addLog('Night 1 begins.','night');
+  renderGame();renderLeaderboard();
+  showGameTab('players',null);
+}
+
+/* SCORING */
+function ensureLB(name){if(!name)return null;if(!lb[name])lb[name]={totalPts:0,gamePts:0,games:0,achievements:[],history:[]};return lb[name];}
+function creditPlayer(name,pts,desc){if(!name)return;ensureLB(name);lb[name].totalPts+=pts;lb[name].gamePts=(lb[name].gamePts||0)+pts;addLog(`⭐ ${name}: ${desc} (+${pts}pts)`,'shuffle');renderLeaderboard();}
+
+function renderLeaderboard(){
+  const body=document.getElementById('leaderboard-body');if(!body)return;
+  const gc=document.getElementById('lb-game-count');if(gc)gc.textContent=gameCount?`${gameCount} game${gameCount>1?'s':''} played`:'No completed games yet';
+  const entries=Object.entries(lb).map(([name,d])=>({name,...d})).sort((a,b)=>b.totalPts-a.totalPts);
+  if(!entries.length){body.innerHTML='<div style="font-size:12px;color:var(--text2);padding:8px 0">No scores yet — complete a game to populate.</div>';renderGuide();return;}
+  const sym=i=>i===0?'👑':i===1?'☽':i===2?'✦':'';
+  const rc=i=>i===0?'gld':i===1?'slv':i===2?'brz':'';
+  body.innerHTML=entries.map((e,i)=>`<div class="lb-row${i===0?' lbf':''}">
+    <div class="lb-rank ${rc(i)}">${sym(i)||i+1}</div>
+    <div><div class="lb-name">${e.name}</div>${e.achievements.length?`<div style="display:flex;gap:3px;margin-top:2px">${[...new Set(e.achievements)].map(em=>`<span style="font-size:13px">${em}</span>`).join('')}</div>`:''}</div>
+    <div style="font-size:11px;color:var(--text2);text-align:right">${e.games||0}g</div>
+    <div class="lb-pts">${e.totalPts}<span style="font-size:10px;color:var(--text2);margin-left:3px">pts</span></div>
+  </div>`).join('');
+  renderGuide();
+}
+function renderGuide(){
+  const el=document.getElementById('scoring-guide');if(!el)return;
+  const rows=[['Town role win','3–5','Special roles score higher'],['Mafia role win','4–6','Specialists score higher'],['Neutral win','5–9','SK/Arsonist 9, Jester 8'],['💊 Doctor saves Mafia target','+3','Auto-detected on resolve'],['🔫 Vigilante kills Mafia/Neutral','+4','Auto-detected on resolve'],['🔪 Mafia kills Sheriff/Doctor','+3','Auto-detected on resolve'],['🃏 Jester lynched by town','+8 win','Auto-awarded on day vote']];
+  el.innerHTML=rows.map(([l,p,n])=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--b0);font-size:12px"><span style="color:var(--text1)">${l}</span><span style="display:flex;gap:12px"><span style="color:var(--gold);font-family:var(--disp)">${p}</span><span style="color:var(--text2);width:160px;text-align:right">${n}</span></span></div>`).join('');
+}
+
+/* LOG */
+function addLog(msg,type){const prefix=type==='night'?`Night ${round}: `:type==='day'?`Day ${round}: `:'';log.unshift({msg:prefix+msg,type});}
+function renderLog(){const el=document.getElementById('game-log');if(!el)return;if(!log.length){el.innerHTML='<div style="font-size:12px;color:var(--text2)">No events yet.</div>';return;}el.innerHTML=log.slice(0,60).map(e=>`<div class="log-entry log-${e.type}">${e.msg}</div>`).join('');}
+
+/* TIMER */
+function syncTimers(){const m=Math.floor(timerSec/60),s=timerSec%60,t=`${m}:${s.toString().padStart(2,'0')}`;['timer-display','timer-display-night'].forEach(id=>{const el=document.getElementById(id);if(el){el.textContent=t;el.className='timer-display'+(timerSec<=10?' timer-warn':'');}});}
+function setTimer(s){timerSec=s;stopTimer();syncTimers();}
+function renderTimer(){syncTimers();}
+function toggleTimer(){timerRunning?stopTimer():startTimerRun();}
+function startTimerRun(){timerRunning=true;['timer-toggle-btn','timer-toggle-btn-night'].forEach(id=>{const b=document.getElementById(id);if(b)b.textContent='Pause';});timerInterval=setInterval(()=>{if(timerSec<=0){stopTimer();return;}timerSec--;syncTimers();},1000);}
+function stopTimer(){timerRunning=false;clearInterval(timerInterval);['timer-toggle-btn','timer-toggle-btn-night'].forEach(id=>{const b=document.getElementById(id);if(b)b.textContent='Start';});}
+
+/* SCRIPT ENGINE */
+const NSTEPS=[
+  {id:'open',always:true,title:'Opening',st:'night',lines:[{t:'say',tx:'Everyone, close your eyes and put your heads down.'},{t:'wait',tx:'Wait for the room to settle completely.'},{t:'note',tx:'Watch the room — ensure nobody is peeking.'}]},
+  {id:'mafia',roles:['Godfather','Mafioso','Consigliere','Consort','Blackmailer','Janitor','Disguiser','Forger','Framer','Hypnotist','Mafia (basic)'],title:'Mafia wakes',st:'night',lines:[{t:'say',tx:'Mafia, open your eyes.'},{t:'wait',tx:'Give them a moment to silently coordinate.'},{t:'action',tx:'Mafia silently agree on one kill target. They point to indicate who.'},{t:'say',tx:'Mafia, close your eyes.'}],rn:{Consigliere:{t:'action',tx:'Consigliere points to an investigate target.'},Consort:{t:'action',tx:'Consort points to a roleblock target.'},Blackmailer:{t:'action',tx:'Blackmailer points to a player to silence next day.'},Janitor:{t:'action',tx:'Janitor may silently nod to clean tonight\'s kill.'}}},
+  {id:'vampire',roles:['Vampire'],title:'Vampires wake',st:'night',lines:[{t:'say',tx:'Vampires, open your eyes.'},{t:'action',tx:'Vampires silently agree on a convert target.'},{t:'say',tx:'Vampires, close your eyes.'}]},
+  {id:'escort',roles:['Escort'],title:'Escort wakes',st:'night',lines:[{t:'say',tx:'Escort, open your eyes.'},{t:'action',tx:'Escort points to a player to roleblock.'},{t:'say',tx:'Escort, close your eyes.'}]},
+  {id:'transporter',roles:['Transporter'],title:'Transporter wakes',st:'night',lines:[{t:'say',tx:'Transporter, open your eyes.'},{t:'action',tx:'Transporter points to two players to swap.'},{t:'say',tx:'Transporter, close your eyes.'}]},
+  {id:'veteran',roles:['Veteran'],title:'Veteran wakes',st:'night',lines:[{t:'say',tx:'Veteran, open your eyes.'},{t:'action',tx:'Veteran gives thumbs up to go on alert, or thumbs down to rest.'},{t:'say',tx:'Veteran, close your eyes.'}]},
+  {id:'arsonist',roles:['Arsonist'],title:'Arsonist wakes',st:'night',lines:[{t:'say',tx:'Arsonist, open your eyes.'},{t:'action',tx:'Arsonist points to douse a player, or thumbs up to ignite all doused.'},{t:'say',tx:'Arsonist, close your eyes.'}]},
+  {id:'sk',roles:['Serial Killer'],title:'Serial Killer wakes',st:'night',lines:[{t:'say',tx:'Serial Killer, open your eyes.'},{t:'action',tx:'Serial Killer points to a kill target.'},{t:'say',tx:'Serial Killer, close your eyes.'}]},
+  {id:'pirate',roles:['Pirate'],title:'Pirate wakes',st:'night',lines:[{t:'say',tx:'Pirate, open your eyes.'},{t:'action',tx:'Pirate points to a duel target.'},{t:'say',tx:'Pirate, close your eyes.'}]},
+  {id:'witch',roles:['Witch'],title:'Witch wakes',st:'night',lines:[{t:'say',tx:'Witch, open your eyes.'},{t:'action',tx:'Witch points to control a player, then points to their forced target.'},{t:'say',tx:'Witch, close your eyes.'}]},
+  {id:'lookout',roles:['Lookout','Tracker'],title:'Lookout / Tracker wakes',st:'night',lines:[{t:'say',tx:'Lookout and Tracker, open your eyes.'},{t:'action',tx:'Each points to a player to watch or track.'},{t:'say',tx:'Lookout and Tracker, close your eyes.'}]},
+  {id:'spy',roles:['Spy'],title:'Spy wakes',st:'night',lines:[{t:'say',tx:'Spy, open your eyes.'},{t:'note',tx:'Point out Mafia members to the Spy silently.'},{t:'say',tx:'Spy, close your eyes.'}]},
+  {id:'sheriff',roles:['Sheriff'],title:'Sheriff wakes',st:'night',lines:[{t:'say',tx:'Sheriff, open your eyes.'},{t:'action',tx:'Sheriff points to investigate. Thumbs up = suspicious, thumbs down = innocent.'},{t:'note',tx:'Godfather always appears Innocent.'},{t:'say',tx:'Sheriff, close your eyes.'}]},
+  {id:'investigator',roles:['Investigator'],title:'Investigator wakes',st:'night',lines:[{t:'say',tx:'Investigator, open your eyes.'},{t:'action',tx:'Investigator points to investigate. Hand them the 3-role clue card.'},{t:'say',tx:'Investigator, close your eyes.'}]},
+  {id:'psychic',roles:['Psychic'],title:'Psychic wakes',st:'night',lines:[{t:'say',tx:'Psychic, open your eyes.'},{t:'action',tx:'Show a written group of 3 — 1 evil (odd nights) or 1 good (even nights).'},{t:'say',tx:'Psychic, close your eyes.'}]},
+  {id:'crusader',roles:['Crusader'],title:'Crusader wakes',st:'night',lines:[{t:'say',tx:'Crusader, open your eyes.'},{t:'action',tx:'Crusader points to a player to protect and ambush visitors.'},{t:'say',tx:'Crusader, close your eyes.'}]},
+  {id:'doctor',roles:['Doctor'],title:'Doctor wakes',st:'night',lines:[{t:'say',tx:'Doctor, open your eyes.'},{t:'action',tx:'Doctor points to heal. Self-heal allowed once per game.'},{t:'say',tx:'Doctor, close your eyes.'}]},
+  {id:'medium',roles:['Medium'],title:'Medium wakes',st:'night',lines:[{t:'say',tx:'Medium, open your eyes.'},{t:'action',tx:'Pass a written note from one dead player to the Medium.'},{t:'say',tx:'Medium, close your eyes.'}]},
+  {id:'vigilante',roles:['Vigilante'],title:'Vigilante wakes',st:'night',lines:[{t:'say',tx:'Vigilante, open your eyes.'},{t:'action',tx:'Vigilante may point to shoot, or thumbs down to abstain.'},{t:'note',tx:'Killing a Townie = Vigilante dies of guilt next night.'},{t:'say',tx:'Vigilante, close your eyes.'}]},
+  {id:'survivor',roles:['Survivor'],title:'Survivor wakes',st:'night',lines:[{t:'say',tx:'Survivor, open your eyes.'},{t:'action',tx:'Survivor thumbs up to use a bulletproof vest (limited uses).'},{t:'say',tx:'Survivor, close your eyes.'}]},
+  {id:'guardian',roles:['Guardian Angel'],title:'Guardian Angel wakes',st:'night',lines:[{t:'say',tx:'Guardian Angel, open your eyes.'},{t:'action',tx:'Guardian Angel points to their assigned target to protect.'},{t:'say',tx:'Guardian Angel, close your eyes.'}]},
+  {id:'dawn',always:true,title:'Dawn — resolve',st:'night',lines:[{t:'say',tx:'Everyone, open your eyes. Morning has come to Salem...'},{t:'action',tx:'Switch to the Night tab → hit Resolve night to process all actions.'},{t:'note',tx:'Whisper private results (Sheriff, Investigator, Lookout) before announcing deaths.'}]},
+];
+const DSTEPS=[
+  {id:'disc',always:true,title:'Discussion',st:'day',lines:[{t:'say',tx:'The floor is open. You have 5 minutes. Who do you suspect?'},{t:'note',tx:'Start the timer. Dead players must stay silent.'}]},
+  {id:'blk',roles:['Blackmailer'],title:'Blackmailed player',st:'day',lines:[{t:'note',tx:'The blackmailed player (noted last night) may not speak or vote. Inform them quietly.'}]},
+  {id:'mayor',roles:['Mayor'],title:'Mayor reveal',st:'day',lines:[{t:'note',tx:'If Mayor reveals, their vote counts as 3. They can no longer be healed.'}]},
+  {id:'vote',always:true,title:'Nomination & trial',st:'day',lines:[{t:'say',tx:'Does anyone wish to nominate a player for trial?'},{t:'action',tx:'Use the Day vote panel in the Players tab to eliminate the accused.'},{t:'say',tx:'[NAME], you have 30 seconds to defend yourself.'},{t:'note',tx:'Jester: if they get voted out → they win. Points auto-awarded.'}]},
+  {id:'nf',always:true,title:'Nightfall',st:'day',lines:[{t:'say',tx:'As the sun sets, the town retreats indoors. Night descends on Salem...'},{t:'note',tx:'Hit Next phase → switch to the Night tab to begin.'}]},
+];
+function buildScript(steps,active){return steps.filter(s=>{if(s.always)return true;if(s.roles)return s.roles.some(r=>active.has(r));return false;}).map(s=>{let lines=[...s.lines];if(s.rn)Object.entries(s.rn).forEach(([role,l])=>{if(active.has(role))lines.push(l);});if(s.id==='lookout'){const hL=active.has('Lookout'),hT=active.has('Tracker');s={...s,title:hL&&hT?'Lookout & Tracker wake':hL?'Lookout wakes':'Tracker wakes'};}return{...s,lines};});}
+function toggleScriptPhase(){scriptPhase=scriptPhase==='night'?'day':'night';renderScript();}
+function renderScript(){
+  const body=document.getElementById('script-body');if(!body)return;
+  const btn=document.getElementById('script-phase-btn');if(btn)btn.textContent=scriptPhase==='night'?'Show day script':'Show night script';
+  const active=new Set(Object.keys(rotation).filter(r=>rotation[r]>0));
+  const steps=buildScript(scriptPhase==='night'?NSTEPS:DSTEPS,active);
+  if(!steps.length){body.innerHTML='<div class="no-script-msg">Add roles in setup to generate the script.</div>';return;}
+  const im={say:'▶',wait:'◌',action:'✎',note:'i'};
+  body.innerHTML=steps.map((step,idx)=>{
+    const nc=step.st==='night'?'snum-night':'snum-day';
+    const rtags=step.roles?step.roles.filter(r=>active.has(r)).map(r=>{const f=FX(r);return f?`<span class="srt srt-${f}">${r}</span>`:''}).join(''):'';
+    const ls=step.lines.map((l,i,a)=>`<div class="sline"><div class="sicon icon-${l.t}">${im[l.t]||'·'}</div><div class="stext${l.t==='say'?' squote':''}">${l.t==='say'?`"${l.tx}"`:l.tx}</div></div>${i<a.length-1?'<div class="sdivider"></div>':''}`).join('');
+    return`<div class="script-block"><div class="script-block-hd"><span class="snum ${nc}">${idx+1}</span><span class="sbt">${step.title}</span>${rtags?`<span style="margin-left:6px">${rtags}</span>`:''}</div><div class="script-lines">${ls}</div></div>`;
+  }).join('');
+}
+
+/* INIT */
+/* ═══════════════════════════════════════════
+   ROLE WIKI
+═══════════════════════════════════════════ */
+const WIKI=[
+  {role:'Sheriff',faction:'town',emoji:'⭐',ability:'Each night, investigate one player. You learn if they are suspicious (Mafia, Serial Killer, or Arsonist) or innocent. The Godfather always appears innocent.',win:'Town wins — eliminate all Mafia and hostile Neutral roles.',tip:'Share your findings carefully. If the Mafia know you\'re the Sheriff, you\'re their next target. Consider claiming a weaker role to buy time.'},
+  {role:'Doctor',faction:'town',emoji:'💊',ability:'Each night, choose one player to heal. If they are attacked that night, they survive. You may heal yourself once per game.',win:'Town wins — eliminate all Mafia and hostile Neutral roles.',tip:'The Mafia will try to find and kill you early. Consider self-healing on nights you feel exposed. Coordinate with the Sheriff if possible.'},
+  {role:'Investigator',faction:'town',emoji:'🔍',ability:'Each night, investigate one player. You receive a group of three possible roles that player could be. Piece together clues over multiple nights.',win:'Town wins — eliminate all Mafia and hostile Neutral roles.',tip:'Keep your findings private until you have enough data. Revealing too early gives Mafia time to adapt.'},
+  {role:'Vigilante',faction:'town',emoji:'🔫',ability:'Once per night, shoot a player of your choice. If you kill a Town member, you die of guilt the following night. You have limited bullets.',win:'Town wins — eliminate all Mafia and hostile Neutral roles.',tip:'Only shoot if you have strong evidence. Killing a Townie costs you your life — a double loss for Town.'},
+  {role:'Escort',faction:'town',emoji:'🚫',ability:'Each night, visit one player and roleblock them. Their night action is cancelled. Visiting a Serial Killer will get you killed.',win:'Town wins — eliminate all Mafia and hostile Neutral roles.',tip:'Roleblocking the same suspect two nights running with no confirmed kill is a strong signal they\'re Mafia. Be careful who you visit.'},
+  {role:'Lookout',faction:'town',emoji:'👁️',ability:'Each night, watch a player. At dawn you learn the names of everyone who visited that player during the night.',win:'Town wins — eliminate all Mafia and hostile Neutral roles.',tip:'Watch the Sheriff or Doctor — anyone who visits them is worth investigating. Your info is most powerful after a death.'},
+  {role:'Mayor',faction:'town',emoji:'🏛️',ability:'You may publicly reveal yourself as Mayor at any time. Once revealed, your vote counts as three during trials. You cannot be healed by the Doctor once revealed.',win:'Town wins — eliminate all Mafia and hostile Neutral roles.',tip:'Reveal at a critical moment — like a tied vote or when Town needs to push through an execution. Revealing early makes you a priority target.'},
+  {role:'Medium',faction:'town',emoji:'💬',ability:'Once per night, receive a written message from one dead player passed by the moderator. Dead players can share what they couldn\'t before.',win:'Town wins — eliminate all Mafia and hostile Neutral roles.',tip:'Ask dead players to confirm roles, share suspicions, or reveal who killed them. A powerful information channel Mafia can\'t block.'},
+  {role:'Transporter',faction:'town',emoji:'🔀',ability:'Each night, swap two players. All night actions targeting either player are redirected to the other. You can include yourself in the swap.',win:'Town wins — eliminate all Mafia and hostile Neutral roles.',tip:'Swapping the Mafia\'s target with the Godfather can cause the Mafia to kill their own leader. Highly disruptive if timed well.'},
+  {role:'Veteran',faction:'town',emoji:'🪖',ability:'You may go on alert at night. While on alert you kill anyone who visits you — friend or foe. You have a limited number of alerts.',win:'Town wins — eliminate all Mafia and hostile Neutral roles.',tip:'Go on alert when you feel threatened. Be cautious — you will kill the Doctor or Escort too if they visit.'},
+  {role:'Tracker',faction:'town',emoji:'👣',ability:'Each night, follow one player. At dawn you learn which player they visited that night (if any).',win:'Town wins — eliminate all Mafia and hostile Neutral roles.',tip:'Track suspects over multiple nights. If they consistently visit the same player who then dies, you\'ve found your killer.'},
+  {role:'Spy',faction:'town',emoji:'🕵️',ability:'Each night, the moderator reveals the Mafia members to you and who they visited.',win:'Town wins — eliminate all Mafia and hostile Neutral roles.',tip:'You know everything — but revealing too much exposes you. Feed information to the Sheriff or Investigator indirectly.'},
+  {role:'Crusader',faction:'town',emoji:'⚔️',ability:'Each night, protect one player. If anyone attacks your protected target, the Crusader kills that attacker.',win:'Town wins — eliminate all Mafia and hostile Neutral roles.',tip:'Protect players likely to be targeted — the Sheriff, Doctor, or a recently outed Town member. You\'re an offensive protector, not a pure healer.'},
+  {role:'Psychic',faction:'town',emoji:'🔮',ability:'On odd nights, the moderator shows you three players — one is evil. On even nights, three players — one is good.',win:'Town wins — eliminate all Mafia and hostile Neutral roles.',tip:'Cross-reference your visions over multiple nights. If someone appears in the "evil" group twice, they\'re a strong suspect.'},
+  {role:'Retributionist',faction:'town',emoji:'⚡',ability:'Once per game, use a dead Town member\'s ability on a target. The dead player\'s role fires once as if they were alive.',win:'Town wins — eliminate all Mafia and hostile Neutral roles.',tip:'Use a dead Sheriff\'s investigate on a prime suspect, or a dead Doctor\'s heal on someone in danger. Save this for a pivotal moment.'},
+  {role:'Amnesiac',faction:'town',emoji:'🧩',ability:'Each night, secretly choose a dead role to become permanently. You adopt that role\'s win condition and abilities.',win:'Depends on the role you remember — Town roles win with Town, Mafia roles win with Mafia.',tip:'Wait for a powerful dead role before committing. Becoming a dead Sheriff or Vigilante late game can turn the tide.'},
+  {role:'Survivor',faction:'town',emoji:'🛡️',ability:'You have a limited number of bulletproof vests. Each night you may activate one, making you immune to a single attack.',win:'Survive to the end of the game — regardless of which faction wins.',tip:'Stay under the radar. Save vests for nights you feel most vulnerable. You win with anyone so don\'t draw attention.'},
+  {role:'Town (basic)',faction:'town',emoji:'🏘️',ability:'A standard Town member with no special night ability. You vote during the day and contribute to discussion.',win:'Town wins — eliminate all Mafia and hostile Neutral roles.',tip:'You\'re the backbone of the Town. Pay attention to behaviour, timing, and who defends whom. Your vote is your most powerful tool.'},
+  // Mafia
+  {role:'Godfather',faction:'mafia',emoji:'🎩',ability:'You lead the Mafia. Each night, coordinate with your team on a kill target. You appear Innocent to the Sheriff\'s investigation.',win:'Mafia wins — equal or outnumber all remaining players.',tip:'Stay in the shadows. Let your Mafioso carry out kills while you blend in as a Townie. Never contradict yourself publicly.'},
+  {role:'Mafioso',faction:'mafia',emoji:'🔪',ability:'You carry out the Mafia\'s kill each night as directed by the Godfather. If the Godfather dies, you become the new leader.',win:'Mafia wins — equal or outnumber all remaining players.',tip:'If the Godfather dies, lead quietly. Avoid drawing attention and coordinate any remaining Mafia members discreetly.'},
+  {role:'Consigliere',faction:'mafia',emoji:'🔎',ability:'Each night, investigate one player and learn their exact role — not just guilty or innocent, but the specific role.',win:'Mafia wins — equal or outnumber all remaining players.',tip:'Find the Sheriff and Doctor first — they\'re the biggest threats. Share findings with the Godfather to prioritise kills.'},
+  {role:'Consort',faction:'mafia',emoji:'🚫',ability:'Each night, roleblock one player. Their night action is cancelled. Works identically to Escort, but for Mafia.',win:'Mafia wins — equal or outnumber all remaining players.',tip:'Block the Sheriff or Doctor on critical nights. Neutralise them without burning a kill.'},
+  {role:'Blackmailer',faction:'mafia',emoji:'🤐',ability:'Each night, blackmail one player. The following day, that player cannot speak or vote during discussion and trial.',win:'Mafia wins — equal or outnumber all remaining players.',tip:'Silence the Sheriff on the day they\'re about to share findings, or silence a strong Town voice during a critical trial.'},
+  {role:'Janitor',faction:'mafia',emoji:'🧹',ability:'Once per night, clean the Mafia\'s kill target. Their role will not be revealed on death — Town sees only a body.',win:'Mafia wins — equal or outnumber all remaining players.',tip:'Clean high-value kills like Sheriff or Doctor. Town losing role confirmation is almost as valuable as the kill itself.'},
+  {role:'Disguiser',faction:'mafia',emoji:'🎭',ability:'Disguise yourself as another player\'s role for the night. Investigative roles checking you will see the disguised role.',win:'Mafia wins — equal or outnumber all remaining players.',tip:'Disguise as a confirmed Town role to pass Sheriff checks. Coordinate with the Godfather to avoid being investigated at the wrong time.'},
+  {role:'Forger',faction:'mafia',emoji:'📝',ability:'Forge a dead player\'s role card, replacing their revealed role with a fake one of your choice.',win:'Mafia wins — equal or outnumber all remaining players.',tip:'Forge a dead Mafia member\'s card as a Town role to cast doubt on previous suspicions.'},
+  {role:'Framer',faction:'mafia',emoji:'🖼️',ability:'Each night, frame one player. They will appear Suspicious to the Sheriff\'s investigation that night, regardless of their actual role.',win:'Mafia wins — equal or outnumber all remaining players.',tip:'Frame a player the Sheriff is likely investigating. A trusted Townie suddenly appearing guilty sows confusion and mistrust.'},
+  {role:'Hypnotist',faction:'mafia',emoji:'🌀',ability:'Each night, give one player a false night result message — such as "you were visited by someone" or "your target was healed."',win:'Mafia wins — equal or outnumber all remaining players.',tip:'Give Lookouts false visitor messages or make the Sheriff think they were roleblocked. Misinformation is as powerful as a kill.'},
+  {role:'Mafia (basic)',faction:'mafia',emoji:'🕶️',ability:'A standard Mafia member. You participate in the nightly kill decision and vote during the day alongside Town.',win:'Mafia wins — equal or outnumber all remaining players.',tip:'Blend in completely during the day. Accuse others convincingly, defend your teammates subtly, and never contradict the group story.'},
+  // Neutral
+  {role:'Jester',faction:'neutral',emoji:'🃏',ability:'You have no night ability. Your goal is to get yourself executed by the town during a day vote. Act suspicious — but not too obvious.',win:'Get voted out by the town during a day trial.',tip:'Claim a role badly, give inconsistent alibis, or accuse people erratically. Make the town want to hang you — but not see through the act.'},
+  {role:'Serial Killer',faction:'neutral',emoji:'🗡️',ability:'Each night, kill one player of your choice. You are immune to Escort and Consort roleblocks. Win by being the last player standing.',win:'Be the last player (or last two) alive.',tip:'Blend in as Town during the day. Let Mafia and Town weaken each other before making your move. Kill the Doctor early if you can.'},
+  {role:'Arsonist',faction:'neutral',emoji:'🔥',ability:'Each night, either douse a player in oil or ignite all currently doused players at once, killing them simultaneously.',win:'Be the last player alive after igniting.',tip:'Douse many players before igniting. Patience is key — igniting too early with few targets wastes your setup. Let the game thin out first.'},
+  {role:'Executioner',faction:'neutral',emoji:'🪧',ability:'You are secretly assigned a random Town player as your target. Get them executed by a day vote. If your target dies at night, you become a Jester.',win:'Get your assigned target voted out by the town.',tip:'Build a case against your target with fabricated evidence. If they die at night, pivot immediately to Jester tactics.'},
+  {role:'Witch',faction:'neutral',emoji:'🧙',ability:'Each night, choose one player to control, then choose a second player as their forced target. The controlled player\'s action is redirected.',win:'Survive to the end when evil wins.',tip:'Force the Doctor to heal a Mafia member, or redirect the Sheriff\'s investigation onto a Townie. You win when evil wins — support Mafia subtly.'},
+  {role:'Pirate',faction:'neutral',emoji:'🏴‍☠️',ability:'Each night, duel one player. Both choose a move secretly. Win the duel to kill them; lose and they survive. Win enough duels to win the game.',win:'Win a set number of duels before the game ends.',tip:'Study patterns in your target\'s moves. If they survive, they know you\'re the Pirate — switch targets quickly.'},
+  {role:'Vampire',faction:'neutral',emoji:'🧛',ability:'Each night, bite one player and convert them into a Vampire. Converted players join your faction. A Vampire Hunter can kill Vampires.',win:'Vampires equal or outnumber all other living players.',tip:'Convert Town members strategically, avoiding the Vampire Hunter. Grow your numbers quietly — every conversion is one fewer enemy.'},
+  {role:'Guardian Angel',faction:'neutral',emoji:'😇',ability:'You are secretly assigned a random player to protect. Each night you may shield them from death.',win:'Your assigned target is alive when the game ends.',tip:'Protect your target every night. Even if your target is Mafia, your win condition is purely keeping them alive — so do it.'},
+];
+
+let wikiFilter='all';
+function setWikiFaction(f,btn){
+  wikiFilter=f;
+  document.querySelectorAll('.wiki-f-btn').forEach(b=>b.classList.remove('active-wiki'));
+  if(btn) btn.classList.add('active-wiki');
+  renderWiki();
+}
+
+function renderWiki(){
+  const body=document.getElementById('wiki-body');if(!body)return;
+  const show=wikiFilter==='all'?WIKI:WIKI.filter(r=>r.faction===wikiFilter);
+  const factions=wikiFilter==='all'?['town','mafia','neutral']:[wikiFilter];
+  const fLabels={town:'Town',mafia:'Mafia',neutral:'Neutral'};
+  let html='';
+  factions.forEach(f=>{
+    const roles=show.filter(r=>r.faction===f);if(!roles.length)return;
+    if(wikiFilter==='all') html+=`<div class="wiki-faction-hd ${f}">${fLabels[f]}</div>`;
+    roles.forEach(r=>{
+      const pts=WIN_PTS[r.role]||3;
+      const id='wi-'+r.role.replace(/[\s()'/]/g,'_');
+      html+=`<div class="wiki-card">
+        <div class="wiki-card-hd" onclick="toggleWiki('${id}')">
+          <span class="wiki-emoji">${r.emoji}</span>
+          <span class="wiki-role-name">${r.role}</span>
+          <div class="wiki-tags">
+            <span class="wiki-pts-badge wiki-pts-${r.faction}">${pts} pts</span>
+          </div>
+          <span class="wiki-arrow" id="warr-${id}">▶</span>
+        </div>
+        <div class="wiki-body-inner" id="${id}">
+          <div class="wiki-section-lbl">Ability</div>
+          <div class="wiki-desc">${r.ability}</div>
+          <div class="wiki-section-lbl">Win condition</div>
+          <div class="wiki-desc">${r.win}</div>
+          <div class="wiki-section-lbl">Moderator tip</div>
+          <div class="wiki-tip">${r.tip}</div>
+        </div>
+      </div>`;
+    });
+  });
+  body.innerHTML=html||'<div style="font-size:13px;color:var(--text2);padding:16px 0">No roles to show.</div>';
+}
+
+function toggleWiki(id){
+  const b=document.getElementById(id),a=document.getElementById('warr-'+id);if(!b)return;
+  const open=b.classList.toggle('open');
+  if(a) a.classList.toggle('open',open);
+}
+
+buildSetup();buildRoleChips();updateRS();initNightState();
+</script>
+</body>
+</html>
