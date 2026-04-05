@@ -26,9 +26,8 @@ https://github.com/thorsundal-ux/salem-moderator/blob/main/moderator_control_pan
 	•	Runs entirely in the browser
 	•	No installation required
 
-⸻
 
-🚀 Getting Started
+Getting Started
 
 1. Clone the Repository
 
@@ -44,52 +43,17 @@ For best results, use:
 	•	Safari (iPad)
 	•	Chrome (desktop/tablet)
 
-⸻
-
-🧑‍⚖️ How to Use
+How to Use
 	1.	Set up players and assign roles
 	2.	Start the game and manage phases
 	3.	Track eliminations and actions
 	4.	Let the system calculate scores automatically
 
-⸻
 
-🛠️ Tech Stack
-	•	HTML
-	•	CSS
-	•	JavaScript (Vanilla)
-
-⸻
-
-📂 Project Structure
-
-.
-├── moderator_control_panel_ipad.html
-└── README.md
-
-
-⸻
-
-📈 Future Improvements
-	•	Player persistence (save/load games)
-	•	Role customization
-	•	Multiplayer sync (online support)
-	•	Enhanced UI/UX animations
-
-⸻
-
-🤝 Contributing
+Contributing
 
 Contributions are welcome. Feel free to fork the repo and submit a pull request.
 
-⸻
-
-📜 License
-
-This project is currently unlicensed. Add a license if you plan to distribute or collaborate publicly.
-
-⸻
-
-💡 Notes
+Notes
 
 This project is a fan-made moderator tool inspired by social deduction games like Town of Salem. It is not affiliated with any official game or publisher.
